@@ -16,7 +16,7 @@
         <el-table-column prop="descr" label="简介" show-overflow-tooltip/>
         <el-table-column prop="cover" label="封面">
           <template #default="scope">
-            <el-image :src="scope.row.cover" style="width: 50px; height: 50px; border-radius: 5px" :preview-src-list="[scope.row.cover]" preview-teleported></el-image>
+            <el-image :src="toFileUrl(scope.row.cover)" style="width: 50px; height: 50px; border-radius: 5px" :preview-src-list="[toFileUrl(scope.row.cover)]" preview-teleported></el-image>
           </template>
         </el-table-column>
         <el-table-column prop="content" label="内容" width="100px">
@@ -69,6 +69,7 @@
 
 import {reactive} from "vue";
 import request from "@/utils/request.js";
+import { getFileKey, toFileUrl } from "@/utils/file.js";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {Delete, Edit} from "@element-plus/icons-vue";
 import '@wangeditor/editor/dist/css/style.css' // 引入 css
@@ -109,7 +110,7 @@ const preview = (content) => {
 
 const baseUrl = import.meta.env.VITE_BASE_URL
 const handleFileUpload = (res) => {
-  data.form.cover = res.data
+  data.form.cover = getFileKey(res.data)
 }
 
 /* wangEditor5 初始化开始 */

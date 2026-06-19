@@ -18,7 +18,7 @@
         <el-table-column prop="avatar" label="头像">
           <template v-slot="scope">
             <el-image style="width: 40px; height: 40px; border-radius: 50%; display: block" v-if="scope.row.avatar"
-                      :src="scope.row.avatar" :preview-src-list="[scope.row.avatar]" preview-teleported></el-image>
+                      :src="toFileUrl(scope.row.avatar)" :preview-src-list="[toFileUrl(scope.row.avatar)]" preview-teleported></el-image>
           </template>
         </el-table-column>
         <el-table-column prop="name" label="姓名" />
@@ -76,6 +76,7 @@
 
 import {reactive} from "vue";
 import request from "@/utils/request.js";
+import { getFileKey, toFileUrl } from "@/utils/file.js";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {Delete, Edit} from "@element-plus/icons-vue";
 
@@ -181,7 +182,7 @@ const handleSelectionChange = (rows) => {
 
 const handleFileUpload = (res) => {
   if (res.code === '200') {
-    data.form.avatar = `${baseUrl}/files/download/${res.data}`;
+    data.form.avatar = getFileKey(res.data);
   } else {
     ElMessage.error(res.msg);
   }

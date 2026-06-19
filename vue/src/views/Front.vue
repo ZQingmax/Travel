@@ -70,7 +70,7 @@
         <div v-else class="user-menu">
           <el-dropdown trigger="click">
             <div class="user-info">
-              <img :src="data.user.avatar" alt="Avatar" class="avatar">
+              <img :src="toFileUrl(data.user.avatar)" alt="Avatar" class="avatar">
               <span class="username">{{ data.user.name }}</span>
               <el-icon><ArrowDown /></el-icon>
             </div>
@@ -104,6 +104,7 @@
 import { reactive } from "vue";
 import router from "@/router/index.js";
 import request from "@/utils/request.js";
+import { toFileUrl } from "@/utils/file.js";
 import Footer from "@/components/Footer.vue";
 import { House, Notebook, MapLocation, Ticket, ChatDotRound, ArrowDown } from '@element-plus/icons-vue';
 

@@ -1,8 +1,10 @@
 package com.mingde.service;
 
+import com.mingde.common.PageUtils;
+import com.mingde.common.PageResult;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import cn.hutool.core.date.DateUtil;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import com.mingde.common.enums.RoleEnum;
 import com.mingde.entity.Account;
 import com.mingde.entity.Feedback;
@@ -10,7 +12,6 @@ import com.mingde.mapper.FeedbackMapper;
 import com.mingde.utils.AuthUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -75,13 +76,13 @@ public class FeedbackService {
         return feedbackMapper.selectAll(feedback);
     }
 
-    public PageInfo<Feedback> selectPage(Feedback feedback, Integer pageNum, Integer pageSize) {
+    public PageResult<Feedback> selectPage(Feedback feedback, Integer pageNum, Integer pageSize) {
         Account currentUser = AuthUtils.currentUser();
         if (currentUser.getRole().equals(RoleEnum.USER.name())) {
             feedback.setUserId(currentUser.getId());
         }
-        PageHelper.startPage(pageNum, Math.min(pageSize, 100));
-        List<Feedback> list = feedbackMapper.selectAll(feedback);
-        return PageInfo.of(list);
+        Page<Feedback> page = PageUtils.page(pageNum, pageSize);
+        IPage<Feedback> result = feedbackMapper.selectPage(page, feedback);
+        return PageUtils.toResult(result);
     }
 }

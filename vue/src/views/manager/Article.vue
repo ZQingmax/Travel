@@ -17,8 +17,8 @@
         <el-table-column prop="descr" label="简介" />
         <el-table-column prop="cover" label="封面">
           <template #default="scope">
-            <el-image :src="scope.row.cover" style="width: 50px; height: 50px; border-radius: 5px"
-                      :preview-src-list="[scope.row.cover]" preview-teleported></el-image>
+            <el-image :src="toFileUrl(scope.row.cover)" style="width: 50px; height: 50px; border-radius: 5px"
+                      :preview-src-list="[toFileUrl(scope.row.cover)]" preview-teleported></el-image>
           </template>
         </el-table-column>
         <el-table-column prop="content" label="内容">
@@ -101,6 +101,7 @@
 
 import {reactive} from "vue";
 import request from "@/utils/request.js";
+import { getFileKey, toFileUrl } from "@/utils/file.js";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {Delete, Edit} from "@element-plus/icons-vue";
 import '@wangeditor/editor/dist/css/style.css' // 引入 css
@@ -127,7 +128,7 @@ const baseUrl = import.meta.env.VITE_BASE_URL
 const handleFileUpload = (res) => {
   if (res.code === '200') {
     // 拼接完整访问路径
-    data.form.cover = `${baseUrl}/files/download/${res.data}`;
+    data.form.cover = getFileKey(res.data);
   } else {
     ElMessage.error(res.msg);
   }

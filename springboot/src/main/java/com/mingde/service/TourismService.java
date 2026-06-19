@@ -1,14 +1,15 @@
 package com.mingde.service;
 
+import com.mingde.common.PageUtils;
+import com.mingde.common.PageResult;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import cn.hutool.core.date.DateUtil;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import com.mingde.entity.Tourism;
 import com.mingde.mapper.TourismMapper;
 import com.mingde.utils.AuthUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -48,9 +49,9 @@ public class TourismService {
         return tourismMapper.selectAll(tourism);
     }
 
-    public PageInfo<Tourism> selectPage(Tourism tourism, Integer pageNum, Integer pageSize) {
-        PageHelper.startPage(pageNum, Math.min(pageSize, 100));
-        List<Tourism> list = tourismMapper.selectAll(tourism);
-        return PageInfo.of(list);
+    public PageResult<Tourism> selectPage(Tourism tourism, Integer pageNum, Integer pageSize) {
+        Page<Tourism> page = PageUtils.page(pageNum, pageSize);
+        IPage<Tourism> result = tourismMapper.selectPage(page, tourism);
+        return PageUtils.toResult(result);
     }
 }

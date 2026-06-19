@@ -35,7 +35,7 @@
         >
           <div class="product-card" @click="goPage('/front/tourismDetail?id=' + item.id)">
             <div class="image-wrapper">
-              <img :src="item.img" alt="" class="product-image">
+              <img :src="toFileUrl(item.img)" alt="" class="product-image">
             </div>
             <div class="product-info">
               <div class="product-title">{{ item.name }}</div>
@@ -68,6 +68,7 @@
 <script setup>
 import { reactive } from "vue";
 import request from "@/utils/request.js";
+import { toFileUrl } from "@/utils/file.js";
 
 const data = reactive({
   tourismList: [],
@@ -290,7 +291,8 @@ load()
   }
 
   .product-col {
-    :span = "12";
+    flex: 0 0 50%;
+    max-width: 50%;
   }
 }
 </style>

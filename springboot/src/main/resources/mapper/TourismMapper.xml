@@ -4,12 +4,15 @@
 <mapper namespace="com.mingde.mapper.TourismMapper">
 
     <select id="selectAll" resultType="com.mingde.entity.Tourism">
-        select tourism.*,sum(orders.num) as orderNum from tourism
-        left join orders on tourism.id = orders.tourism_id
+        select tourism.*, coalesce(order_stats.orderNum, 0) as orderNum from tourism
+        left join (
+            select tourism_id, sum(num) as orderNum
+            from orders
+            group by tourism_id
+        ) order_stats on tourism.id = order_stats.tourism_id
         <where>
             <if test="name != null"> and tourism.name like concat('%', #{name}, '%')</if>
         </where>
-        group by tourism.id
         <choose>
             <when test="sort == 'hot'">order by orderNum desc</when>
             <when test="sort == 'new'">order by tourism.id desc</when>
@@ -19,66 +22,23 @@
         </choose>
     </select>
 
-    <delete id="deleteById">
-        delete from `tourism`
-        where id = #{id}
-    </delete>
-
-    <insert id="insert" parameterType="com.mingde.entity.Tourism" useGeneratedKeys="true">
-        insert into tourism
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="id != null">id,</if>
-            <if test="name != null">name,</if>
-            <if test="img != null">img,</if>
-            <if test="descr != null">descr,</if>
-            <if test="content != null">content,</if>
-            <if test="price != null">price,</if>
-            <if test="store != null">store,</if>
-            <if test="specials != null">specials,</if>
-            <if test="date != null">date,</if>
-        </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="id != null">#{id},</if>
-            <if test="name != null">#{name},</if>
-            <if test="img != null">#{img},</if>
-            <if test="descr != null">#{descr},</if>
-            <if test="content != null">#{content},</if>
-            <if test="price != null">#{price},</if>
-            <if test="store != null">#{store},</if>
-            <if test="specials != null">#{specials},</if>
-            <if test="date != null">#{date},</if>
-        </trim>
-    </insert>
-
-    <update id="updateById" parameterType="com.mingde.entity.Tourism">
-        update tourism
-        <set>
-            <if test="name != null">
-                name = #{name},
-            </if>
-            <if test="img != null">
-                img = #{img},
-            </if>
-            <if test="descr != null">
-                descr = #{descr},
-            </if>
-            <if test="content != null">
-                content = #{content},
-            </if>
-            <if test="price != null">
-                price = #{price},
-            </if>
-            <if test="store != null">
-                store = #{store},
-            </if>
-            <if test="specials != null">
-                specials = #{specials},
-            </if>
-            <if test="date != null">
-                date = #{date},
-            </if>
-        </set>
-        where id = #{id}
-    </update>
+    <select id="selectPage" resultType="com.mingde.entity.Tourism">
+        select tourism.*, coalesce(order_stats.orderNum, 0) as orderNum from tourism
+        left join (
+            select tourism_id, sum(num) as orderNum
+            from orders
+            group by tourism_id
+        ) order_stats on tourism.id = order_stats.tourism_id
+        <where>
+            <if test="query != null and query.name != null"> and tourism.name like concat('%', #{query.name}, '%')</if>
+        </where>
+        <choose>
+            <when test="query != null and query.sort == 'hot'">order by orderNum desc</when>
+            <when test="query != null and query.sort == 'new'">order by tourism.id desc</when>
+            <otherwise>
+                order by tourism.id desc
+            </otherwise>
+        </choose>
+    </select>
 
 </mapper>

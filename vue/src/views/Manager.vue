@@ -14,7 +14,7 @@
       <div class="manager-header-right">
         <el-dropdown style="cursor: pointer">
           <div style="padding-right: 20px; display: flex; align-items: center">
-            <img style="width: 40px; height: 40px; border-radius: 50%;" :src="data.user.avatar" alt="">
+            <img style="width: 40px; height: 40px; border-radius: 50%;" :src="toFileUrl(data.user.avatar)" alt="">
             <span style="margin-left: 5px; color: white">{{ data.user.name }}</span><el-icon color="#fff"><arrow-down /></el-icon>
           </div>
           <template #dropdown>
@@ -77,6 +77,7 @@
 import { reactive } from "vue";
 import router from "@/router/index.js";
 import {ElMessage} from "element-plus";
+import { toFileUrl } from "@/utils/file.js";
 
 const data = reactive({
   user: JSON.parse(localStorage.getItem('xm-user') || '{}')

@@ -38,7 +38,7 @@
               list-type="picture-card"
               :on-success="handleFileUpload"
               :limit="1"
-              :file-list="data.form.cover ? [{ url: data.form.cover }] : []"
+              :file-list="data.form.cover ? [{ url: toFileUrl(data.form.cover) }] : []"
           >
             <el-icon><Plus /></el-icon>
             <template #tip>
@@ -130,6 +130,7 @@
 import { reactive, ref, shallowRef, onBeforeUnmount } from "vue";
 import router from "@/router/index.js";
 import request from "@/utils/request.js";
+import { getFileKey, toFileUrl } from "@/utils/file.js";
 import { ElMessage } from "element-plus";
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue';
 import '@wangeditor/editor/dist/css/style.css';
@@ -202,7 +203,7 @@ const update = () => {
 
 const handleFileUpload = (res) => {
   if (res.code === '200') {
-    data.form.cover = `${baseUrl}/files/download/${res.data}`
+    data.form.cover = getFileKey(res.data)
   } else {
     ElMessage.error(res.msg)
   }

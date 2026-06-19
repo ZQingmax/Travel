@@ -9,7 +9,7 @@
             :show-file-list="false"
             class="avatar-uploader"
         >
-          <img v-if="data.user.avatar" :src="data.user.avatar" class="avatar" />
+          <img v-if="data.user.avatar" :src="toFileUrl(data.user.avatar)" class="avatar" />
           <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
         </el-upload>
       </el-form-item>
@@ -35,6 +35,7 @@
 <script setup>
 import { reactive } from "vue";
 import request from "@/utils/request.js";
+import { getFileKey, toFileUrl } from "@/utils/file.js";
 import {ElMessage} from "element-plus";
 
 const baseUrl = import.meta.env.VITE_BASE_URL
@@ -45,7 +46,7 @@ const data = reactive({
 
 const handleFileUpload = (res) => {
   if (res.code === '200') {
-    data.user.avatar = `${baseUrl}/files/download/${res.data}`;
+    data.user.avatar = getFileKey(res.data);
     ElMessage.success('头像上传成功');
   } else {
     ElMessage.error(res.msg || '上传失败');

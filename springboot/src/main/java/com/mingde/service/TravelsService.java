@@ -1,8 +1,11 @@
 package com.mingde.service;
 
+import com.mingde.common.IdCount;
+import com.mingde.common.PageUtils;
+import com.mingde.common.PageResult;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import cn.hutool.core.date.DateUtil;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import com.mingde.common.enums.RoleEnum;
 import com.mingde.entity.Account;
 import com.mingde.entity.Travels;
@@ -12,8 +15,9 @@ import com.mingde.mapper.TravelsMapper;
 import com.mingde.utils.AuthUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class TravelsService {
@@ -76,24 +80,22 @@ public class TravelsService {
         return travelsMapper.selectAll(travels);
     }
 
-    public PageInfo<Travels> selectPage(Travels travels, Integer pageNum, Integer pageSize) {
+    public PageResult<Travels> selectPage(Travels travels, Integer pageNum, Integer pageSize) {
         Account currentUser = AuthUtils.currentUser();
         if (RoleEnum.USER.name().equals(currentUser.getRole())) {
             travels.setUserId(currentUser.getId());
         }
-        PageHelper.startPage(pageNum, Math.min(pageSize, 100));
-        List<Travels> list = travelsMapper.selectAll(travels);
-        return PageInfo.of(list);
+        Page<Travels> page = PageUtils.page(pageNum, pageSize);
+        IPage<Travels> result = travelsMapper.selectPage(page, travels);
+        return PageUtils.toResult(result);
     }
 
-    public PageInfo<Travels> selectFrontPage(Travels travels, Integer pageNum, Integer pageSize) {
+    public PageResult<Travels> selectFrontPage(Travels travels, Integer pageNum, Integer pageSize) {
         travels.setStatus("通过");
-        PageHelper.startPage(pageNum, Math.min(pageSize, 100));
-        List<Travels> list = travelsMapper.selectAll(travels);
-        for (Travels t : list) {
-            setTravelData(t);
-        }
-        return PageInfo.of(list);
+        Page<Travels> page = PageUtils.page(pageNum, pageSize);
+        IPage<Travels> result = travelsMapper.selectPage(page, travels);
+        setTravelData(result.getRecords());
+        return PageUtils.toResult(result);
     }
 
     public void updateReadCount(Integer id) {
@@ -101,7 +103,19 @@ public class TravelsService {
     }
 
     private void setTravelData(Travels travels) {
-        Integer count = praiseMapper.selectCount(travels.getId());
+        Integer count = praiseMapper.selectPraiseCount(travels.getId());
         travels.setPraiseCount(count);
+    }
+
+    private void setTravelData(List<Travels> travelsList) {
+        if (travelsList == null || travelsList.isEmpty()) {
+            return;
+        }
+        List<Integer> ids = travelsList.stream()
+                .map(Travels::getId)
+                .toList();
+        Map<Integer, Integer> countMap = praiseMapper.selectPraiseCounts(ids).stream()
+                .collect(Collectors.toMap(IdCount::getId, item -> item.getCount() == null ? 0 : item.getCount()));
+        travelsList.forEach(travels -> travels.setPraiseCount(countMap.getOrDefault(travels.getId(), 0)));
     }
 }

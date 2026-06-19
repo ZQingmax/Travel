@@ -1,8 +1,10 @@
 package com.mingde.service;
 
+import com.mingde.common.PageUtils;
+import com.mingde.common.PageResult;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import cn.hutool.core.util.ObjectUtil;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import com.mingde.common.Constants;
 import com.mingde.common.enums.ResultCodeEnum;
 import com.mingde.common.enums.RoleEnum;
@@ -15,7 +17,6 @@ import com.mingde.utils.PasswordUtils;
 import com.mingde.utils.TokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -73,12 +74,12 @@ public class UserService {
         return userMapper.selectAll(user);
     }
 
-    public PageInfo<User> selectPage(User user, Integer pageNum, Integer pageSize) {
+    public PageResult<User> selectPage(User user, Integer pageNum, Integer pageSize) {
         AuthUtils.requireAdmin();
-        PageHelper.startPage(pageNum, Math.min(pageSize, 100));
-        List<User> list = userMapper.selectAll(user);
-        list.forEach(item -> item.setPassword(null));
-        return PageInfo.of(list);
+        Page<User> page = PageUtils.page(pageNum, pageSize);
+        IPage<User> result = userMapper.selectPage(page, user);
+        result.getRecords().forEach(item -> item.setPassword(null));
+        return PageUtils.toResult(result);
     }
 
     public User login(Account account) {

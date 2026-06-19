@@ -1,13 +1,14 @@
 package com.mingde.service;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import com.mingde.common.PageUtils;
+import com.mingde.common.PageResult;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.mingde.entity.Routes;
 import com.mingde.mapper.RoutesMapper;
 import com.mingde.utils.AuthUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -46,9 +47,9 @@ public class RoutesService {
         return routesMapper.selectAll(routes);
     }
 
-    public PageInfo<Routes> selectPage(Routes routes, Integer pageNum, Integer pageSize) {
-        PageHelper.startPage(pageNum, Math.min(pageSize, 100));
-        List<Routes> list = routesMapper.selectAll(routes);
-        return PageInfo.of(list);
+    public PageResult<Routes> selectPage(Routes routes, Integer pageNum, Integer pageSize) {
+        Page<Routes> page = PageUtils.page(pageNum, pageSize);
+        IPage<Routes> result = routesMapper.selectPage(page, routes);
+        return PageUtils.toResult(result);
     }
 }

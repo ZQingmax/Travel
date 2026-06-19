@@ -1,16 +1,20 @@
 package com.mingde.service;
 
+import com.mingde.common.PageUtils;
+import com.mingde.common.PageResult;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import cn.hutool.core.date.DateUtil;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import com.mingde.entity.Account;
 import com.mingde.entity.Comment;
 import com.mingde.mapper.CommentMapper;
 import com.mingde.utils.AuthUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class CommentService {
@@ -78,23 +82,28 @@ public class CommentService {
     }
 
     public Integer selectCount(Integer fid, String module) {
-        return commentMapper.selectCount(fid, module);
+        return commentMapper.selectCommentCount(fid, module);
     }
 
-    public PageInfo<Comment> selectTree(Comment comment, Integer pageNum, Integer pageSize) {
-        PageHelper.startPage(pageNum, Math.min(pageSize, 100));
-        List<Comment> list = commentMapper.selectRoot(comment);
-        for (Comment root : list) {
-            List<Comment> children = commentMapper.selectByRootId(root.getId());
-            root.setChildren(children);
+    public PageResult<Comment> selectTree(Comment comment, Integer pageNum, Integer pageSize) {
+        Page<Comment> page = PageUtils.page(pageNum, pageSize);
+        IPage<Comment> result = commentMapper.selectRootPage(page, comment);
+        List<Integer> rootIds = result.getRecords().stream()
+                .map(Comment::getId)
+                .toList();
+        if (!rootIds.isEmpty()) {
+            Map<Integer, List<Comment>> childrenMap = commentMapper.selectByRootIds(rootIds).stream()
+                    .collect(Collectors.groupingBy(Comment::getRootId));
+            result.getRecords().forEach(root -> root.setChildren(
+                    childrenMap.getOrDefault(root.getId(), Collections.emptyList())));
         }
-        return PageInfo.of(list);
+        return PageUtils.toResult(result);
     }
 
-    public PageInfo<Comment> selectPage(Comment comment, Integer pageNum, Integer pageSize) {
+    public PageResult<Comment> selectPage(Comment comment, Integer pageNum, Integer pageSize) {
         AuthUtils.requireAdmin();
-        PageHelper.startPage(pageNum, Math.min(pageSize, 100));
-        List<Comment> list = commentMapper.selectAll(comment);
-        return PageInfo.of(list);
+        Page<Comment> page = PageUtils.page(pageNum, pageSize);
+        IPage<Comment> result = commentMapper.selectAllPage(page, comment);
+        return PageUtils.toResult(result);
     }
 }

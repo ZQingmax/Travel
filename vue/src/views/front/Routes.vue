@@ -24,7 +24,7 @@
           <a :href="'/front/routesDetail?id=' + item.id" class="route-link">
             <div class="route-card">
               <div class="image-wrapper">
-                <img :src="item.img" alt="" class="route-image">
+                <img :src="toFileUrl(item.img)" alt="" class="route-image">
                 <div class="image-overlay">
                   <span class="view-detail">查看详情</span>
                 </div>
@@ -36,7 +36,7 @@
       </el-row>
 
       <!-- 分页 -->
-      <div class="pagination-wrapper" v  v-if="data.total">
+      <div class="pagination-wrapper" v-if="data.total">
         <el-pagination
             size="small"
             @current-change="load"
@@ -55,6 +55,7 @@
 <script setup>
 import { reactive } from "vue";
 import request from "@/utils/request.js";
+import { toFileUrl } from "@/utils/file.js";
 
 const data = reactive({
   routesList: [],

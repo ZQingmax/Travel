@@ -1,15 +1,16 @@
 package com.mingde.service;
 
+import com.mingde.common.PageUtils;
+import com.mingde.common.PageResult;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import cn.hutool.core.date.DateUtil;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import com.mingde.entity.Article;
 import com.mingde.mapper.ArticleMapper;
 import com.mingde.mapper.CollectMapper;
 import com.mingde.utils.AuthUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -56,10 +57,10 @@ public class ArticleService {
         return articleMapper.selectAll(article);
     }
 
-    public PageInfo<Article> selectPage(Article article, Integer pageNum, Integer pageSize) {
-        PageHelper.startPage(pageNum, Math.min(pageSize, 100));
-        List<Article> list = articleMapper.selectAll(article);
-        return PageInfo.of(list);
+    public PageResult<Article> selectPage(Article article, Integer pageNum, Integer pageSize) {
+        Page<Article> page = PageUtils.page(pageNum, pageSize);
+        IPage<Article> result = articleMapper.selectPage(page, article);
+        return PageUtils.toResult(result);
     }
 
     public List<Article> selectRecommend() {

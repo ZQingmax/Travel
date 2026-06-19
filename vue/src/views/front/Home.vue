@@ -22,7 +22,7 @@
         <div class="travel-list">
           <div v-for="item in data.travelsList" :key="item.id" class="travel-card">
             <div class="travel-content">
-              <img :src="item.cover" alt="" class="travel-cover">
+              <img :src="toFileUrl(item.cover)" alt="" class="travel-cover">
               <div class="travel-info">
                 <a :href="'/front/travelDetail?id=' + item.id" class="travel-title">{{ item.title }}</a>
                 <div class="travel-desc">{{ item.descr }}</div>
@@ -62,7 +62,7 @@
             <a href="/front/article" class="more-link">更多>></a>
           </div>
           <div v-for="item in data.articleList" :key="item.id" class="strategy-item">
-            <img :src="item.cover" alt="" class="strategy-cover">
+            <img :src="toFileUrl(item.cover)" alt="" class="strategy-cover">
             <a :href="'/front/articleDetail?id=' + item.id" class="strategy-title">{{ item.title }}</a>
           </div>
         </div>
@@ -88,6 +88,7 @@ import img2 from "@/assets/imgs/2.jpg";
 import img3 from "@/assets/imgs/3.jpg";
 import img4 from "@/assets/imgs/4.jpg";
 import request from "@/utils/request.js";
+import { toFileUrl } from "@/utils/file.js";
 import { ElMessage } from "element-plus";
 
 const data = reactive({

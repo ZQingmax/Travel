@@ -20,7 +20,7 @@
           <a :href="'/front/articleDetail?id=' + item.id" target="_blank" class="article-link">
             <div class="article-content" :class="{ 'reverse': index % 2 !== 0 }">
               <div class="image-wrapper">
-                <img :src="item.cover" alt="" class="cover-image">
+                <img :src="toFileUrl(item.cover)" alt="" class="cover-image">
               </div>
               <div class="text-wrapper">
                 <div class="article-title">{{ item.title }}</div>
@@ -54,6 +54,7 @@
 <script setup>
 import { reactive } from "vue";
 import request from "@/utils/request.js";
+import { toFileUrl } from "@/utils/file.js";
 
 const data = reactive({
   tableData: [],

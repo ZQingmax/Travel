@@ -1,8 +1,10 @@
 package com.mingde.service;
 
+import com.mingde.common.PageUtils;
+import com.mingde.common.PageResult;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import cn.hutool.core.date.DateUtil;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import com.mingde.common.enums.RoleEnum;
 import com.mingde.entity.Account;
 import com.mingde.entity.Collect;
@@ -11,7 +13,6 @@ import com.mingde.mapper.CollectMapper;
 import com.mingde.utils.AuthUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -65,13 +66,13 @@ public class CollectService {
         return collectMapper.selectAll(collect);
     }
 
-    public PageInfo<Collect> selectPage(Collect collect, Integer pageNum, Integer pageSize) {
+    public PageResult<Collect> selectPage(Collect collect, Integer pageNum, Integer pageSize) {
         Account currentUser = AuthUtils.currentUser();
         if (currentUser.getRole().equals(RoleEnum.USER.name())) {
             collect.setUserId(currentUser.getId());
         }
-        PageHelper.startPage(pageNum, Math.min(pageSize, 100));
-        List<Collect> list = collectMapper.selectAll(collect);
-        return PageInfo.of(list);
+        Page<Collect> page = PageUtils.page(pageNum, pageSize);
+        IPage<Collect> result = collectMapper.selectPage(page, collect);
+        return PageUtils.toResult(result);
     }
 }

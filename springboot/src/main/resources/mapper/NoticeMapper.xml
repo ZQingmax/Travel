@@ -11,41 +11,12 @@
         order by id desc
     </select>
 
-    <delete id="deleteById">
-        delete from `notice`
-        where id = #{id}
-    </delete>
-
-    <insert id="insert" parameterType="com.mingde.entity.Notice" useGeneratedKeys="true">
-        insert into `notice`
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="id != null">id,</if>
-            <if test="title != null">title,</if>
-            <if test="content != null">content,</if>
-            <if test="time != null">time,</if>
-        </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="id != null">#{id},</if>
-            <if test="title != null">#{title},</if>
-            <if test="content != null">#{content},</if>
-            <if test="time != null">#{time},</if>
-        </trim>
-    </insert>
-
-    <update id="updateById" parameterType="com.mingde.entity.Notice">
-        update `notice`
-        <set>
-            <if test="title != null">
-                title = #{title},
-            </if>
-            <if test="content != null">
-                content = #{content},
-            </if>
-            <if test="time != null">
-                time = #{time},
-            </if>
-        </set>
-        where id = #{id}
-    </update>
+    <select id="selectPage" resultType="com.mingde.entity.Notice">
+        select * from `notice`
+        <where>
+            <if test="query != null and query.title != null"> and title like concat('%', #{query.title}, '%')</if>
+        </where>
+        order by id desc
+    </select>
 
 </mapper>

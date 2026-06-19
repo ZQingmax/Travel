@@ -1,19 +1,17 @@
 package com.mingde.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
+import com.mingde.common.IdCount;
 import com.mingde.entity.Praise;
-import io.lettuce.core.dynamic.annotation.Param;
-import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Select;
+import java.util.List;
 
-public interface PraiseMapper {
-
-    //点赞
-    @Insert("insert into praise(fid,user_id) values(#{fid},#{userId})")
-    void insert(Praise praise);
-
+public interface PraiseMapper extends BaseMapper<Praise> {
     //取消点赞
-    @Insert("delete from praise where fid = #{fid} and user_id = #{userId}")
+    @Delete("delete from praise where fid = #{fid} and user_id = #{userId}")
     void deleteByFidAndUserID(@Param("fid") Integer fid, @Param("userId") Integer userId);
 
     //查询是否点赞
@@ -22,5 +20,14 @@ public interface PraiseMapper {
 
     //查询点赞数
     @Select("select count(*) from praise where fid = #{fid}")
-    Integer selectCount(Integer fid);
+    Integer selectPraiseCount(Integer fid);
+
+    @Select({
+            "<script>",
+            "select fid as id, count(*) as count from praise where fid in",
+            "<foreach collection='fids' item='fid' open='(' separator=',' close=')'>#{fid}</foreach>",
+            "group by fid",
+            "</script>"
+    })
+    List<IdCount> selectPraiseCounts(@Param("fids") List<Integer> fids);
 }

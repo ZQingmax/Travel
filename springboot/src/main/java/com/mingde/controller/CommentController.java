@@ -1,12 +1,11 @@
 package com.mingde.controller;
 
-import com.github.pagehelper.PageInfo;
+import com.mingde.common.PageResult;
 import com.mingde.common.Result;
 import com.mingde.entity.Comment;
 import com.mingde.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 /**
@@ -87,7 +86,7 @@ public class CommentController {
     public Result selectTree(Comment comment,
                              @RequestParam(defaultValue = "1") Integer pageNum,
                              @RequestParam(defaultValue = "10") Integer pageSize) {
-        PageInfo<Comment> pageInfo = commentService.selectTree(comment, pageNum, pageSize);
+        PageResult<Comment> pageInfo = commentService.selectTree(comment, pageNum, pageSize);
         return Result.success(pageInfo);
     }
 
@@ -98,7 +97,7 @@ public class CommentController {
     public Result selectPage(Comment comment,
                              @RequestParam(defaultValue = "1") Integer pageNum,
                              @RequestParam(defaultValue = "10") Integer pageSize) {
-        PageInfo<Comment> pageInfo = commentService.selectPage(comment, pageNum, pageSize);
+        PageResult<Comment> pageInfo = commentService.selectPage(comment, pageNum, pageSize);
         return Result.success(pageInfo);
     }
 

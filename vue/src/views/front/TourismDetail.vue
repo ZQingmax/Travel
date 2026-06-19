@@ -4,7 +4,7 @@
       <!-- 产品头部 -->
       <div class="product-header">
         <div class="image-container">
-          <img :src="data.tourism.img" alt="" class="product-image">
+          <img :src="toFileUrl(data.tourism.img)" alt="" class="product-image">
         </div>
         <div class="info-container">
           <h1 class="product-title">{{ data.tourism.name }}</h1>
@@ -71,6 +71,7 @@
 <script setup>
 import { reactive } from "vue";
 import request from "@/utils/request.js";
+import { getFileKey, toFileUrl } from "@/utils/file.js";
 import router from "@/router/index.js";
 import {ElMessage} from "element-plus";
 
@@ -100,7 +101,7 @@ const saveOrder = () => {
 const addOrder = () => {
   data.formVisible = true
   data.form.tourismId = data.tourism.id
-  data.form.tourismImg = data.tourism.img  // 修正为 img
+  data.form.tourismImg = getFileKey(data.tourism.img)
   data.form.name = data.tourism.name
   data.form.tourismPrice = data.tourism.price
   data.form.num = 1

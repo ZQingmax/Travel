@@ -11,7 +11,7 @@
     <div>
       <div v-for="item in data.commentList" :key="item.id">
         <div style="display: flex; align-items: flex-start;  grid-gap: 20px; margin-bottom: 10px">
-          <img :src="item.userAvatar" alt="" style="width: 50px; height: 50px; border-radius: 50%">
+          <img :src="toFileUrl(item.userAvatar)" alt="" style="width: 50px; height: 50px; border-radius: 50%">
           <div style="flex: 1; width: 0">
             <div style="margin-bottom: 10px; color: #666">{{ item.userName }}</div>
             <div style="margin-bottom: 10px; text-align: justify">{{ item.content }}</div>
@@ -30,7 +30,7 @@
         <div style="padding-left: 70px" v-if="item.children?.length">
           <div v-for="subItem in item.children" :key="subItem.id">
             <div style="display: flex; align-items: flex-start;  grid-gap: 20px; margin-bottom: 10px">
-              <img :src="subItem.userAvatar" alt="" style="width: 50px; height: 50px; border-radius: 50%">
+              <img :src="toFileUrl(subItem.userAvatar)" alt="" style="width: 50px; height: 50px; border-radius: 50%">
               <div style="flex: 1; width: 0">
                 <div style="margin-bottom: 10px; color: #666">{{ subItem.userName }} <span>回复 @{{ subItem.parentUserName }}</span></div>
                 <div style="margin-bottom: 10px; text-align: justify">{{ subItem.content }}</div>
@@ -61,6 +61,7 @@
 <script setup>
 import { reactive } from "vue";
 import request from "@/utils/request.js";
+import { toFileUrl } from "@/utils/file.js";
 import router from "@/router/index.js";
 import {ElMessage, ElMessageBox} from "element-plus";
 

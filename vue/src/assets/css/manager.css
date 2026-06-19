@@ -62,7 +62,7 @@
     outline: none;
 }
 
-/deep/.el-sub-menu__title {
+.el-sub-menu__title {
     color: #666 !important;
     height: 50px;
     line-height: 50px;
@@ -99,10 +99,10 @@
     color: #5cdd3d !important;
 }
 
-/deep/.el-breadcrumb__inner {
+.el-breadcrumb__inner {
     color: white !important;
 }
 
-/deep/.manager-header-right span {
+.manager-header-right span {
     color: white;
 }

@@ -16,7 +16,7 @@ spring:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
 
-mybatis:
+mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: true
@@ -31,8 +31,18 @@ alipay:
 
 fileBaseUrl: ${FILE_BASE_URL:http://localhost:${server.port}}
 file:
+  storage: ${FILE_STORAGE:local}
   uploadDir: ${FILE_UPLOAD_DIR:${user.dir}/files}
   allowedImageTypes: image/jpeg,image/png,image/gif,image/webp,image/avif
+  oss:
+    endpoint: ${OSS_ENDPOINT:}
+    region: ${OSS_REGION:}
+    bucketName: ${OSS_BUCKET_NAME:}
+    accessKeyId: ${OSS_ACCESS_KEY_ID:}
+    accessKeySecret: ${OSS_ACCESS_KEY_SECRET:}
+    objectPrefix: ${OSS_OBJECT_PREFIX:images}
+    publicBaseUrl: ${OSS_PUBLIC_BASE_URL:}
+    signedUrlExpirationSeconds: ${OSS_SIGNED_URL_EXPIRATION_SECONDS:3600}
 
 
 cors:

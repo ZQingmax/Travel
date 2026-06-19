@@ -12,61 +12,13 @@
         order by id desc
     </select>
 
-    <delete id="deleteById">
-        delete from `user`
-        where id = #{id}
-    </delete>
-
-    <insert id="insert" parameterType="com.mingde.entity.User" useGeneratedKeys="true">
-        insert into `user`
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="id != null">id,</if>
-            <if test="username != null">username,</if>
-            <if test="password != null">password,</if>
-            <if test="name != null">name,</if>
-            <if test="phone != null">phone,</if>
-            <if test="email != null">email,</if>
-            <if test="avatar != null">avatar,</if>
-            <if test="role != null">role,</if>
-        </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="id != null">#{id},</if>
-            <if test="username != null">#{username},</if>
-            <if test="password != null">#{password},</if>
-            <if test="name != null">#{name},</if>
-            <if test="phone != null">#{phone},</if>
-            <if test="email != null">#{email},</if>
-            <if test="avatar != null">#{avatar},</if>
-            <if test="role != null">#{role},</if>
-        </trim>
-    </insert>
-
-    <update id="updateById" parameterType="com.mingde.entity.User">
-        update `user`
-        <set>
-            <if test="username != null">
-                username = #{username},
-            </if>
-            <if test="password != null">
-                password = #{password},
-            </if>
-            <if test="name != null">
-                name = #{name},
-            </if>
-            <if test="phone != null">
-                phone = #{phone},
-            </if>
-            <if test="email != null">
-                email = #{email},
-            </if>
-            <if test="avatar != null">
-                avatar = #{avatar},
-            </if>
-            <if test="role != null">
-                role = #{role},
-            </if>
-        </set>
-        where id = #{id}
-    </update>
+    <select id="selectPage" resultType="com.mingde.entity.User">
+        select * from `user`
+        <where>
+            <if test="query != null and query.username != null"> and username like concat('%', #{query.username}, '%')</if>
+            <if test="query != null and query.name != null"> and name like concat('%', #{query.name}, '%')</if>
+        </where>
+        order by id desc
+    </select>
 
 </mapper>

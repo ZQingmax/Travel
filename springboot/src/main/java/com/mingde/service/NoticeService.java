@@ -1,14 +1,15 @@
 package com.mingde.service;
 
+import com.mingde.common.PageUtils;
+import com.mingde.common.PageResult;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import cn.hutool.core.date.DateUtil;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import com.mingde.entity.Notice;
 import com.mingde.mapper.NoticeMapper;
 import com.mingde.utils.AuthUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -48,10 +49,10 @@ public class NoticeService {
         return noticeMapper.selectAll(notice);
     }
 
-    public PageInfo<Notice> selectPage(Notice notice, Integer pageNum, Integer pageSize) {
+    public PageResult<Notice> selectPage(Notice notice, Integer pageNum, Integer pageSize) {
         AuthUtils.requireAdmin();
-        PageHelper.startPage(pageNum, Math.min(pageSize, 100));
-        List<Notice> list = noticeMapper.selectAll(notice);
-        return PageInfo.of(list);
+        Page<Notice> page = PageUtils.page(pageNum, pageSize);
+        IPage<Notice> result = noticeMapper.selectPage(page, notice);
+        return PageUtils.toResult(result);
     }
 }

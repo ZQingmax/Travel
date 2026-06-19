@@ -1,12 +1,11 @@
 package com.mingde.controller;
 
-import com.github.pagehelper.PageInfo;
+import com.mingde.common.PageResult;
 import com.mingde.common.Result;
 import com.mingde.entity.Travels;
 import com.mingde.service.TravelsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 /**
@@ -86,10 +85,9 @@ public class TravelsController {
     public Result selectFrontPage(Travels travels,
                              @RequestParam(defaultValue = "1") Integer pageNum,
                              @RequestParam(defaultValue = "10") Integer pageSize) {
-        PageInfo<Travels> pageInfo = travelsService.selectFrontPage(travels, pageNum, pageSize);
+        PageResult<Travels> pageInfo = travelsService.selectFrontPage(travels, pageNum, pageSize);
         return Result.success(pageInfo);
     }
-
 
     /**
      * 分页查询
@@ -98,7 +96,7 @@ public class TravelsController {
     public Result selectPage(Travels travels,
                              @RequestParam(defaultValue = "1") Integer pageNum,
                              @RequestParam(defaultValue = "10") Integer pageSize) {
-        PageInfo<Travels> pageInfo = travelsService.selectPage(travels, pageNum, pageSize);
+        PageResult<Travels> pageInfo = travelsService.selectPage(travels, pageNum, pageSize);
         return Result.success(pageInfo);
     }
 

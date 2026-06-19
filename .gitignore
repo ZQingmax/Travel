@@ -1,4 +1,4 @@
-﻿# IDE
+# IDE
 .idea/
 .vscode/
 
@@ -25,3 +25,4 @@ application-local.yml
 # OS files
 .DS_Store
 Thumbs.db
+.m2/

@@ -16,7 +16,7 @@
         </el-table-column>
         <el-table-column prop="tourismImg" label="商品图片">
           <template #default="scope">
-            <el-image style="width: 50px; height: 50px; border-radius: 5px" :src="scope.row.tourismImg" :preview-src-list="[scope.row.img]" preview-teleported></el-image>
+            <el-image style="width: 50px; height: 50px; border-radius: 5px" :src="toFileUrl(scope.row.tourismImg)" :preview-src-list="[toFileUrl(scope.row.tourismImg)]" preview-teleported></el-image>
           </template>
         </el-table-column>
         <el-table-column prop="tourismPrice" label="商品价格"></el-table-column>
@@ -57,6 +57,7 @@
 
 import {reactive} from "vue";
 import request from "@/utils/request.js";
+import { toFileUrl } from "@/utils/file.js";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {Delete, Edit} from "@element-plus/icons-vue";
 

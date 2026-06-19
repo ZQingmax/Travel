@@ -1,21 +1,16 @@
 package com.mingde.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.mingde.entity.Notice;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
-
 import java.util.List;
 
-public interface NoticeMapper {
-
-    int insert(Notice notice);
-
-    void updateById(Notice notice);
-
-    void deleteById(Integer id);
-
-    @Select("select * from `notice` where id = #{id}")
-    Notice selectById(Integer id);
+public interface NoticeMapper extends BaseMapper<Notice> {
 
     List<Notice> selectAll(Notice notice);
+
+    IPage<Notice> selectPage(IPage<Notice> page, @Param("query") Notice query);
 
 }

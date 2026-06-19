@@ -16,7 +16,7 @@
         <el-table-column prop="name" label="名称" show-overflow-tooltip></el-table-column>
         <el-table-column prop="img" label="图片">
           <template #default="scope">
-            <el-image style="width: 50px; height: 50px; border-radius: 5px" :src="scope.row.img" :preview-src-list="[scope.row.img]" preview-teleported></el-image>
+            <el-image style="width: 50px; height: 50px; border-radius: 5px" :src="toFileUrl(scope.row.img)" :preview-src-list="[toFileUrl(scope.row.img)]" preview-teleported></el-image>
           </template>
         </el-table-column>
         <el-table-column prop="descr" label="简介" show-overflow-tooltip></el-table-column>
@@ -118,6 +118,7 @@
 
 import {reactive} from "vue";
 import request from "@/utils/request.js";
+import { getFileKey, toFileUrl } from "@/utils/file.js";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {Delete, Edit} from "@element-plus/icons-vue";
 import '@wangeditor/editor/dist/css/style.css' // 引入 css
@@ -172,7 +173,7 @@ const handleCreated = (editor) => {
 
 const handleFileUpload = (res) => {
   if (res.code === '200') {
-    data.form.img = `${baseUrl}/files/download/${res.data}`; // 修正字段名
+    data.form.img = getFileKey(res.data);
   } else {
     ElMessage.error(res.msg || '上传失败');
   }

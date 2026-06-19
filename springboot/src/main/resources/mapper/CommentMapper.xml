@@ -18,6 +18,20 @@
         order by comment.id desc
     </select>
 
+    <select id="selectAllPage" resultType="com.mingde.entity.Comment">
+        select comment.*, user.name as userName, user.avatar as userAvatar
+        from comment
+        left join user on comment.user_id = user.id
+        <where>
+            <if test="query != null and query.content != null"> and comment.content like concat('%', #{query.content}, '%')</if>
+            <if test="query != null and query.userId != null"> and comment.user_id = #{query.userId}</if>
+            <if test="query != null and query.fid != null"> and comment.fid = #{query.fid}</if>
+            <if test="query != null and query.module != null"> and comment.module = #{query.module}</if>
+            <if test="query != null and query.rootId != null"> and comment.root_id = #{query.rootId}</if>
+        </where>
+        order by comment.id desc
+    </select>
+
     <select id="selectById" resultType="com.mingde.entity.Comment">
         select * from comment
         where id = #{id}
@@ -28,6 +42,14 @@
         from comment
                  left join user on comment.user_id = user.id
         where comment.fid = #{fid} and comment.module = #{module} and comment.pid is null
+        order by comment.id desc
+    </select>
+
+    <select id="selectRootPage" resultType="com.mingde.entity.Comment">
+        select comment.*, user.name as userName, user.avatar as userAvatar
+        from comment
+                 left join user on comment.user_id = user.id
+        where comment.fid = #{query.fid} and comment.module = #{query.module} and comment.pid is null
         order by comment.id desc
     </select>
 
@@ -44,47 +66,21 @@
         order by comment.id desc
     </select>
 
-    <delete id="deleteById">
-        delete from comment
-        where id = #{id}
-    </delete>
 
-    <insert id="insert" parameterType="com.mingde.entity.Comment" useGeneratedKeys="true" keyProperty="id">
-        insert into comment
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="id != null">id,</if>
-            <if test="content != null">content,</if>
-            <if test="userId != null">user_id,</if>
-            <if test="pid != null">pid,</if>
-            <if test="time != null">time,</if>
-            <if test="fid != null">fid,</if>
-            <if test="module != null">module,</if>
-            <if test="rootId != null">root_id,</if>
-        </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="id != null">#{id},</if>
-            <if test="content != null">#{content},</if>
-            <if test="userId != null">#{userId},</if>
-            <if test="pid != null">#{pid},</if>
-            <if test="time != null">#{time},</if>
-            <if test="fid != null">#{fid},</if>
-            <if test="module != null">#{module},</if>
-            <if test="rootId != null">#{rootId},</if>
-        </trim>
-    </insert>
-
-    <update id="updateById" parameterType="com.mingde.entity.Comment">
-        update comment
-        <set>
-            <if test="content != null">content = #{content},</if>
-            <if test="userId != null">user_id = #{userId},</if>
-            <if test="pid != null">pid = #{pid},</if>
-            <if test="time != null">time = #{time},</if>
-            <if test="fid != null">fid = #{fid},</if>
-            <if test="module != null">module = #{module},</if>
-            <if test="rootId != null">root_id = #{rootId},</if>
-        </set>
-        where id = #{id}
-    </update>
-
+    <select id="selectByRootIds" resultType="com.mingde.entity.Comment">
+        select comment.*,
+               user.name as userName,
+               user.avatar as userAvatar,
+               u2.name as parentUserName
+        from comment
+                 left join user on comment.user_id = user.id
+                 left join comment c2 on comment.pid = c2.id
+                 left join user u2 on c2.user_id = u2.id
+        where comment.root_id in
+        <foreach collection="rootIds" item="rootId" open="(" separator="," close=")">
+            #{rootId}
+        </foreach>
+        and comment.pid is not null
+        order by comment.id desc
+    </select>
 </mapper>

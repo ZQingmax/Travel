@@ -1,12 +1,11 @@
 package com.mingde.controller;
 
+import com.mingde.common.PageResult;
 import com.mingde.common.Result;
 import com.mingde.entity.Admin;
-import com.github.pagehelper.PageInfo;
 import com.mingde.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 /**
@@ -80,7 +79,7 @@ public class AdminController {
     public Result selectPage(Admin admin,
                              @RequestParam(defaultValue = "1") Integer pageNum,
                              @RequestParam(defaultValue = "10") Integer pageSize) {
-        PageInfo<Admin> pageInfo = adminService.selectPage(admin, pageNum, pageSize);
+        PageResult<Admin> pageInfo = adminService.selectPage(admin, pageNum, pageSize);
         return Result.success(pageInfo);
     }
 

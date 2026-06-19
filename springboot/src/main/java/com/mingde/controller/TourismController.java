@@ -1,12 +1,11 @@
 package com.mingde.controller;
 
-import com.github.pagehelper.PageInfo;
+import com.mingde.common.PageResult;
 import com.mingde.common.Result;
 import com.mingde.entity.Tourism;
 import com.mingde.service.TourismService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 /**
@@ -80,7 +79,7 @@ public class TourismController {
     public Result selectPage(Tourism tourism,
                              @RequestParam(defaultValue = "1") Integer pageNum,
                              @RequestParam(defaultValue = "10") Integer pageSize) {
-        PageInfo<Tourism> pageInfo = tourismService.selectPage(tourism, pageNum, pageSize);
+        PageResult<Tourism> pageInfo = tourismService.selectPage(tourism, pageNum, pageSize);
         return Result.success(pageInfo);
     }
 

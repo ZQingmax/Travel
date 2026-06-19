@@ -24,7 +24,7 @@
 
       <!-- 图片 -->
       <div class="image-container">
-        <img :src="data.routes.img" alt="" class="route-image">
+        <img :src="toFileUrl(data.routes.img)" alt="" class="route-image">
       </div>
 
       <!-- 内容详情 -->
@@ -43,6 +43,7 @@
 <script setup>
 import { reactive, onMounted } from "vue";
 import request from "@/utils/request.js";
+import { toFileUrl } from "@/utils/file.js";
 import router from "@/router/index.js";
 
 const data = reactive({

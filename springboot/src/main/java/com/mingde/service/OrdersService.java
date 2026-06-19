@@ -1,9 +1,11 @@
 package com.mingde.service;
 
+import com.mingde.common.PageUtils;
+import com.mingde.common.PageResult;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import com.mingde.common.enums.RoleEnum;
 import com.mingde.entity.Account;
 import com.mingde.entity.Orders;
@@ -15,7 +17,6 @@ import com.mingde.utils.AuthUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -113,14 +114,14 @@ public class OrdersService {
         return ordersMapper.selectAll(orders);
     }
 
-    public PageInfo<Orders> selectPage(Orders orders, Integer pageNum, Integer pageSize) {
+    public PageResult<Orders> selectPage(Orders orders, Integer pageNum, Integer pageSize) {
         Account currentUser = AuthUtils.currentUser();
         if (currentUser.getRole().equals(RoleEnum.USER.name())) {
             orders.setUserId(currentUser.getId());
         }
-        PageHelper.startPage(pageNum, Math.min(pageSize, 100));
-        List<Orders> list = ordersMapper.selectAll(orders);
-        return PageInfo.of(list);
+        Page<Orders> page = PageUtils.page(pageNum, pageSize);
+        IPage<Orders> result = ordersMapper.selectPage(page, orders);
+        return PageUtils.toResult(result);
     }
 
     public Orders selectByOrderNo(String orderNo) {

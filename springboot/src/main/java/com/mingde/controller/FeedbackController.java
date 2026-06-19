@@ -1,12 +1,11 @@
 package com.mingde.controller;
 
-import com.github.pagehelper.PageInfo;
+import com.mingde.common.PageResult;
 import com.mingde.common.Result;
 import com.mingde.entity.Feedback;
 import com.mingde.service.FeedbackService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 /**
@@ -80,7 +79,7 @@ public class FeedbackController {
     public Result selectPage(Feedback feedback,
                              @RequestParam(defaultValue = "1") Integer pageNum,
                              @RequestParam(defaultValue = "10") Integer pageSize) {
-        PageInfo<Feedback> pageInfo = feedbackService.selectPage(feedback, pageNum, pageSize);
+        PageResult<Feedback> pageInfo = feedbackService.selectPage(feedback, pageNum, pageSize);
         return Result.success(pageInfo);
     }
 
