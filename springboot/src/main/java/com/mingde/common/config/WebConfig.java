@@ -15,9 +15,14 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(jwtInterceptor).addPathPatterns("/**")
                 .excludePathPatterns("/")
-                .excludePathPatterns("/login", "/register", "/files/**","/alipay/**",
-                        "/notice/**","/travels/**","/article/**", "/routes/**"
-                );
+                .excludePathPatterns("/login", "/register")
+                .excludePathPatterns("/files/download/**")
+                .excludePathPatterns("/alipay/notify")
+                .excludePathPatterns("/notice/selectAll", "/notice/selectById/**")
+                .excludePathPatterns("/article/selectById/**", "/article/selectAll", "/article/selectRecommend", "/article/selectPage", "/article/updateReadCount/**")
+                .excludePathPatterns("/routes/selectById/**", "/routes/selectAll", "/routes/selectPage")
+                .excludePathPatterns("/tourism/selectById/**", "/tourism/selectAll", "/tourism/selectPage")
+                .excludePathPatterns("/travels/selectById/**", "/travels/selectFrontPage", "/travels/updateReadCount/**")
+                .excludePathPatterns("/comment/selectCount/**", "/comment/selectTree");
     }
-
 }

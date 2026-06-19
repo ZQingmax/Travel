@@ -11,6 +11,7 @@ public class AliPayConfig {
     private String appPrivateKey;
     private String alipayPublicKey;
     private String notifyUrl;
+    private String returnUrl;
 
     public String getAppId() {
         return appId;
@@ -42,5 +43,13 @@ public class AliPayConfig {
 
     public void setNotifyUrl(String notifyUrl) {
         this.notifyUrl = notifyUrl;
+    }
+
+    public String getReturnUrl() {
+        return returnUrl;
+    }
+
+    public void setReturnUrl(String returnUrl) {
+        this.returnUrl = returnUrl;
     }
 }

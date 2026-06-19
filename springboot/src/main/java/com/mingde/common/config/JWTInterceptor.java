@@ -18,9 +18,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-/**
- * JWT拦截器
- */
 @Component
 public class JWTInterceptor implements HandlerInterceptor {
 
@@ -30,46 +27,81 @@ public class JWTInterceptor implements HandlerInterceptor {
     private UserService userService;
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        // 1. 从http请求标头里面拿到token
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         String token = request.getHeader(Constants.TOKEN);
-        if (ObjectUtil.isNull(token)) {
-            // 如果没拿到，那么再从请求参数里拿一次
-            request.getParameter(Constants.TOKEN);
-        }
-        // 2. 开始执行认证
         if (ObjectUtil.isNull(token)) {
             throw new CustomException(ResultCodeEnum.TOKEN_INVALID_ERROR);
         }
-        Account account = null;
-        try {
-            String audience = JWT.decode(token).getAudience().get(0);
-            String userId = audience.split("-")[0];
-            String role = audience.split("-")[1];
-            // 根据用户角色判断用户属于哪个数据库表 然后查询用户数据
-            if (RoleEnum.ADMIN.name().equals(role)) {
-                account = adminService.selectById(Integer.valueOf(userId));
-            } else if (RoleEnum.USER.name().equals(role)) {
-                account = userService.selectById(Integer.valueOf(userId));
-            }
-        } catch (Exception e) {
-            throw new CustomException(ResultCodeEnum.TOKEN_CHECK_ERROR);
-        }
-        // 根据token里面携带的用户ID去对应的角色表查询  没查到 所有报了这个“用户不存在”错误
-        if (ObjectUtil.isNull(account)) {
-            // 用户不存在
-            throw new CustomException(ResultCodeEnum.TOKEN_CHECK_ERROR);
-        }
-        try {
-            // 通过用户的密码作为密钥再次验证token的合法性
-            JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(account.getPassword())).build();
-            jwtVerifier.verify(token);  // 验证token
-        } catch (JWTVerificationException e) {
-            // 用户不存在
-            throw new CustomException(ResultCodeEnum.TOKEN_CHECK_ERROR);
-        }
 
+        Account account = getAccount(token);
+        verifyToken(token, account.getPassword());
+        request.setAttribute("currentAccount", account);
+        checkRolePermission(request, account);
         return true;
     }
 
+    private Account getAccount(String token) {
+        try {
+            String audience = JWT.decode(token).getAudience().get(0);
+            String[] userRole = audience.split("-");
+            if (userRole.length != 2) {
+                throw new CustomException(ResultCodeEnum.TOKEN_CHECK_ERROR);
+            }
+            Integer userId = Integer.valueOf(userRole[0]);
+            String role = userRole[1];
+            Account account = null;
+            if (RoleEnum.ADMIN.name().equals(role)) {
+                account = adminService.selectById(userId);
+            } else if (RoleEnum.USER.name().equals(role)) {
+                account = userService.selectById(userId);
+            }
+            if (account == null) {
+                throw new CustomException(ResultCodeEnum.TOKEN_CHECK_ERROR);
+            }
+            return account;
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new CustomException(ResultCodeEnum.TOKEN_CHECK_ERROR);
+        }
+    }
+
+    private void verifyToken(String token, String password) {
+        try {
+            JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(password)).build();
+            jwtVerifier.verify(token);
+        } catch (JWTVerificationException e) {
+            throw new CustomException(ResultCodeEnum.TOKEN_CHECK_ERROR);
+        }
+    }
+
+    private void checkRolePermission(HttpServletRequest request, Account account) {
+        if (!requiresAdmin(request)) {
+            return;
+        }
+        if (!RoleEnum.ADMIN.name().equals(account.getRole())) {
+            throw new CustomException("403", "无权访问");
+        }
+    }
+
+    private boolean requiresAdmin(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        String method = request.getMethod();
+        if (path.startsWith("/admin") || path.startsWith("/count") || path.startsWith("/ordersData") || path.startsWith("/travelsData")) {
+            return true;
+        }
+        if (path.startsWith("/alipay/refund")) {
+            return true;
+        }
+        if (path.startsWith("/user/select") || path.startsWith("/user/add") || path.startsWith("/user/delete")) {
+            return true;
+        }
+        if (path.startsWith("/notice/") || path.startsWith("/article/") || path.startsWith("/routes/") || path.startsWith("/tourism/")) {
+            return !"GET".equalsIgnoreCase(method);
+        }
+        if (path.startsWith("/orders/selectAll") || path.startsWith("/feedback/selectAll") || path.startsWith("/comment/selectPage")) {
+            return true;
+        }
+        return false;
+    }
 }

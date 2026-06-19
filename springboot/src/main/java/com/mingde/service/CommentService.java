@@ -6,15 +6,12 @@ import com.github.pagehelper.PageInfo;
 import com.mingde.entity.Account;
 import com.mingde.entity.Comment;
 import com.mingde.mapper.CommentMapper;
-import com.mingde.utils.TokenUtils;
+import com.mingde.utils.AuthUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * 业务层方法
- */
 @Service
 public class CommentService {
 
@@ -22,31 +19,42 @@ public class CommentService {
     private CommentMapper commentMapper;
 
     public void add(Comment comment) {
-        Account currentUser = TokenUtils.getCurrentUser();
+        Account currentUser = AuthUtils.currentUser();
         comment.setUserId(currentUser.getId());
         comment.setTime(DateUtil.now());
-        commentMapper.insert(comment);//插入数据库，自增id,这个id作为自己的root_id
+        commentMapper.insert(comment);
 
-        if(comment.getPid() != null){ //子评论必须要root_ip
+        if (comment.getPid() != null) {
             Comment parentComment = this.selectById(comment.getPid());
             comment.setRootId(parentComment.getRootId());
-        }else{ //如果是根节点，root_id就是自己的id
+        } else {
             comment.setRootId(comment.getId());
         }
-
-        this.updateById(comment);
+        commentMapper.updateById(comment);
     }
 
     public void updateById(Comment comment) {
+        Comment dbComment = commentMapper.selectById(comment.getId());
+        if (dbComment != null) {
+            AuthUtils.requireOwnerOrAdmin(dbComment.getUserId());
+        }
+        comment.setUserId(null);
+        comment.setFid(null);
+        comment.setModule(null);
+        comment.setRootId(null);
         commentMapper.updateById(comment);
     }
 
     public void deleteById(Integer id) {
+        Comment dbComment = commentMapper.selectById(id);
+        if (dbComment == null) {
+            return;
+        }
+        AuthUtils.requireOwnerOrAdmin(dbComment.getUserId());
         this.deepDelete(id);
     }
 
-    //递归删除
-    public void deepDelete(Integer pid) {
+    private void deepDelete(Integer pid) {
         List<Comment> children = commentMapper.selectByPid(pid);
         commentMapper.deleteById(pid);
         for (Comment child : children) {
@@ -56,7 +64,7 @@ public class CommentService {
 
     public void deleteBatch(List<Integer> ids) {
         for (Integer id : ids) {
-            commentMapper.deleteById(id);
+            deleteById(id);
         }
     }
 
@@ -65,15 +73,17 @@ public class CommentService {
     }
 
     public List<Comment> selectAll(Comment comment) {
+        AuthUtils.requireAdmin();
         return commentMapper.selectAll(comment);
     }
-    public Integer selectCount(Integer fid,String module) {
-        return commentMapper.selectCount(fid,module);
+
+    public Integer selectCount(Integer fid, String module) {
+        return commentMapper.selectCount(fid, module);
     }
 
     public PageInfo<Comment> selectTree(Comment comment, Integer pageNum, Integer pageSize) {
-        PageHelper.startPage(pageNum, pageSize);
-        List<Comment> list = commentMapper.selectRoot(comment);  // 查询一级节点
+        PageHelper.startPage(pageNum, Math.min(pageSize, 100));
+        List<Comment> list = commentMapper.selectRoot(comment);
         for (Comment root : list) {
             List<Comment> children = commentMapper.selectByRootId(root.getId());
             root.setChildren(children);
@@ -82,7 +92,8 @@ public class CommentService {
     }
 
     public PageInfo<Comment> selectPage(Comment comment, Integer pageNum, Integer pageSize) {
-        PageHelper.startPage(pageNum, pageSize);
+        AuthUtils.requireAdmin();
+        PageHelper.startPage(pageNum, Math.min(pageSize, 100));
         List<Comment> list = commentMapper.selectAll(comment);
         return PageInfo.of(list);
     }

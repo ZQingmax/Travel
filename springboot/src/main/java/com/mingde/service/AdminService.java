@@ -10,15 +10,14 @@ import com.mingde.entity.Account;
 import com.mingde.entity.Admin;
 import com.mingde.exception.CustomException;
 import com.mingde.mapper.AdminMapper;
+import com.mingde.utils.AuthUtils;
+import com.mingde.utils.PasswordUtils;
 import com.mingde.utils.TokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * 业务层方法
- */
 @Service
 public class AdminService {
 
@@ -26,6 +25,7 @@ public class AdminService {
     private AdminMapper adminMapper;
 
     public void add(Admin admin) {
+        AuthUtils.requireAdmin();
         Admin dbAdmin = adminMapper.selectByUsername(admin.getUsername());
         if (ObjectUtil.isNotNull(dbAdmin)) {
             throw new CustomException(ResultCodeEnum.USER_EXIST_ERROR);
@@ -33,6 +33,7 @@ public class AdminService {
         if (ObjectUtil.isEmpty(admin.getPassword())) {
             admin.setPassword(Constants.USER_DEFAULT_PASSWORD);
         }
+        admin.setPassword(PasswordUtils.encode(admin.getPassword()));
         if (ObjectUtil.isEmpty(admin.getName())) {
             admin.setName(admin.getUsername());
         }
@@ -41,14 +42,24 @@ public class AdminService {
     }
 
     public void updateById(Admin admin) {
+        Account currentUser = AuthUtils.currentUser();
+        if (!AuthUtils.isAdmin(currentUser) || !currentUser.getId().equals(admin.getId())) {
+            AuthUtils.requireAdmin();
+        }
+        if (ObjectUtil.isNotEmpty(admin.getPassword()) && !PasswordUtils.isEncoded(admin.getPassword())) {
+            admin.setPassword(PasswordUtils.encode(admin.getPassword()));
+        }
+        admin.setRole(null);
         adminMapper.updateById(admin);
     }
 
     public void deleteById(Integer id) {
+        AuthUtils.requireAdmin();
         adminMapper.deleteById(id);
     }
 
     public void deleteBatch(List<Integer> ids) {
+        AuthUtils.requireAdmin();
         for (Integer id : ids) {
             adminMapper.deleteById(id);
         }
@@ -59,45 +70,46 @@ public class AdminService {
     }
 
     public List<Admin> selectAll(Admin admin) {
+        AuthUtils.requireAdmin();
         return adminMapper.selectAll(admin);
     }
 
     public PageInfo<Admin> selectPage(Admin admin, Integer pageNum, Integer pageSize) {
-        PageHelper.startPage(pageNum, pageSize);
+        AuthUtils.requireAdmin();
+        PageHelper.startPage(pageNum, Math.min(pageSize, 100));
         List<Admin> list = adminMapper.selectAll(admin);
+        list.forEach(item -> item.setPassword(null));
         return PageInfo.of(list);
     }
 
-    /**
-     * 登录
-     */
     public Admin login(Account account) {
         Admin dbAdmin = adminMapper.selectByUsername(account.getUsername());
         if (ObjectUtil.isNull(dbAdmin)) {
             throw new CustomException(ResultCodeEnum.USER_NOT_EXIST_ERROR);
         }
-        if (!dbAdmin.getPassword().equals(account.getPassword())) {
+        if (!PasswordUtils.matches(account.getPassword(), dbAdmin.getPassword())) {
             throw new CustomException(ResultCodeEnum.USER_ACCOUNT_ERROR);
         }
-        // 生成token
+        if (!PasswordUtils.isEncoded(dbAdmin.getPassword())) {
+            dbAdmin.setPassword(PasswordUtils.encode(account.getPassword()));
+            adminMapper.updateById(dbAdmin);
+        }
         String token = TokenUtils.createToken(dbAdmin.getId() + "-" + dbAdmin.getRole(), dbAdmin.getPassword());
         dbAdmin.setToken(token);
+        dbAdmin.setPassword(null);
         return dbAdmin;
     }
 
-    /**
-     * 修改密码
-     */
     public void updatePassword(Account account) {
         Admin dbAdmin = adminMapper.selectByUsername(account.getUsername());
         if (ObjectUtil.isNull(dbAdmin)) {
             throw new CustomException(ResultCodeEnum.USER_NOT_EXIST_ERROR);
         }
-        if (!account.getPassword().equals(dbAdmin.getPassword())) {
+        AuthUtils.requireOwnerOrAdmin(dbAdmin.getId());
+        if (!PasswordUtils.matches(account.getPassword(), dbAdmin.getPassword())) {
             throw new CustomException(ResultCodeEnum.PARAM_PASSWORD_ERROR);
         }
-        dbAdmin.setPassword(account.getNewPassword());
+        dbAdmin.setPassword(PasswordUtils.encode(account.getNewPassword()));
         adminMapper.updateById(dbAdmin);
     }
-
 }

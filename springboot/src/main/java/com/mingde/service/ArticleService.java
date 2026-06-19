@@ -6,6 +6,7 @@ import com.github.pagehelper.PageInfo;
 import com.mingde.entity.Article;
 import com.mingde.mapper.ArticleMapper;
 import com.mingde.mapper.CollectMapper;
+import com.mingde.utils.AuthUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,20 +20,24 @@ public class ArticleService {
     private CollectMapper collectMapper;
 
     public void add(Article article) {
+        AuthUtils.requireAdmin();
         article.setReadCount(0);
         article.setDate(DateUtil.now());
         articleMapper.insert(article);
     }
 
     public void updateById(Article article) {
+        AuthUtils.requireAdmin();
         articleMapper.updateById(article);
     }
 
     public void deleteById(Integer id) {
+        AuthUtils.requireAdmin();
         articleMapper.deleteById(id);
     }
 
     public void deleteBatch(List<Integer> ids) {
+        AuthUtils.requireAdmin();
         for (Integer id : ids) {
             articleMapper.deleteById(id);
         }
@@ -40,18 +45,20 @@ public class ArticleService {
 
     public Article selectById(Integer id) {
         Article article = articleMapper.selectById(id);
-        Integer count = collectMapper.selectByFid(article.getId());
-        article.setCollectCount(count); //设置收藏量
+        if (article != null) {
+            Integer count = collectMapper.selectByFid(article.getId());
+            article.setCollectCount(count);
+        }
         return article;
     }
 
-    public List<Article> selectAll(Article Article) {
-        return articleMapper.selectAll(Article);
+    public List<Article> selectAll(Article article) {
+        return articleMapper.selectAll(article);
     }
 
-    public PageInfo<Article> selectPage(Article Article, Integer pageNum, Integer pageSize) {
-        PageHelper.startPage(pageNum, pageSize);
-        List<Article> list = articleMapper.selectAll(Article);
+    public PageInfo<Article> selectPage(Article article, Integer pageNum, Integer pageSize) {
+        PageHelper.startPage(pageNum, Math.min(pageSize, 100));
+        List<Article> list = articleMapper.selectAll(article);
         return PageInfo.of(list);
     }
 

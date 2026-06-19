@@ -4,6 +4,7 @@
       <el-form-item prop="avatar" label="头像">
         <el-upload
             :action="baseUrl + '/files/upload'"
+            :headers="{ token: data.user.token }"
             :on-success="handleFileUpload"
             :show-file-list="false"
             class="avatar-uploader"

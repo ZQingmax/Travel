@@ -45,6 +45,7 @@
         <el-form-item prop="avatar" label="头像">
           <el-upload
               :action="baseUrl + '/files/upload'"
+            :headers="{ token: data.user.token }"
               :on-success="handleFileUpload"
               list-type="picture"
               >
@@ -81,6 +82,7 @@ import {Delete, Edit} from "@element-plus/icons-vue";
 const baseUrl = import.meta.env.VITE_BASE_URL
 
 const data = reactive({
+  user: JSON.parse(localStorage.getItem('xm-user') || '{}'),
   formVisible: false,
   form: {},
   tableData: [],

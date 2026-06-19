@@ -4,6 +4,7 @@
       <div style="text-align: center; margin-bottom: 20px">
         <el-upload
             :action="baseUrl + '/files/upload'"
+            :headers="{ token: data.user.token }"
             :on-success="handleFileUpload"
             :show-file-list="false"
             class="avatar-uploader"

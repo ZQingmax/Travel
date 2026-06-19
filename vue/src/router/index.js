@@ -55,4 +55,26 @@ const router = createRouter({
   ]
 })
 
+const adminOnlyPaths = ['/manager']
+const userOnlyPaths = [
+  '/front/person',
+  '/front/password',
+  '/front/addTravel',
+  '/front/collect',
+  '/front/orders',
+  '/front/feedback',
+  '/front/myFeedback'
+]
+
+router.beforeEach((to) => {
+  const user = JSON.parse(localStorage.getItem('xm-user') || '{}')
+  if (adminOnlyPaths.some(path => to.path.startsWith(path)) && user.role !== 'ADMIN') {
+    return '/adminLogin'
+  }
+  if (userOnlyPaths.some(path => to.path.startsWith(path)) && user.role !== 'USER') {
+    return '/login'
+  }
+  return true
+})
+
 export default router

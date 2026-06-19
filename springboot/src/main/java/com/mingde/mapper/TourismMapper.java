@@ -2,6 +2,7 @@ package com.mingde.mapper;
 
 import com.mingde.entity.Tourism;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -18,4 +19,6 @@ public interface TourismMapper {
 
     List<Tourism> selectAll(Tourism tourism);
 
+    @Update("update tourism set store = store - #{num} where id = #{id} and store >= #{num}")
+    int decreaseStore(Integer id, Integer num);
 }

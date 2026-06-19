@@ -10,17 +10,16 @@ import com.mingde.entity.Account;
 import com.mingde.entity.User;
 import com.mingde.exception.CustomException;
 import com.mingde.mapper.UserMapper;
+import com.mingde.utils.AuthUtils;
+import com.mingde.utils.PasswordUtils;
 import com.mingde.utils.TokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * 业务层方法
- */
 @Service
-public class UserService{
+public class UserService {
 
     @Autowired
     private UserMapper userMapper;
@@ -33,6 +32,7 @@ public class UserService{
         if (ObjectUtil.isEmpty(user.getPassword())) {
             user.setPassword(Constants.USER_DEFAULT_PASSWORD);
         }
+        user.setPassword(PasswordUtils.encode(user.getPassword()));
         if (ObjectUtil.isEmpty(user.getName())) {
             user.setName(user.getUsername());
         }
@@ -41,14 +41,24 @@ public class UserService{
     }
 
     public void updateById(User user) {
+        Account currentUser = AuthUtils.currentUser();
+        if (!AuthUtils.isAdmin(currentUser)) {
+            user.setId(currentUser.getId());
+        }
+        if (ObjectUtil.isNotEmpty(user.getPassword()) && !PasswordUtils.isEncoded(user.getPassword())) {
+            user.setPassword(PasswordUtils.encode(user.getPassword()));
+        }
+        user.setRole(null);
         userMapper.updateById(user);
     }
 
     public void deleteById(Integer id) {
+        AuthUtils.requireAdmin();
         userMapper.deleteById(id);
     }
 
     public void deleteBatch(List<Integer> ids) {
+        AuthUtils.requireAdmin();
         for (Integer id : ids) {
             userMapper.deleteById(id);
         }
@@ -59,45 +69,46 @@ public class UserService{
     }
 
     public List<User> selectAll(User user) {
+        AuthUtils.requireAdmin();
         return userMapper.selectAll(user);
     }
 
     public PageInfo<User> selectPage(User user, Integer pageNum, Integer pageSize) {
-        PageHelper.startPage(pageNum, pageSize);
+        AuthUtils.requireAdmin();
+        PageHelper.startPage(pageNum, Math.min(pageSize, 100));
         List<User> list = userMapper.selectAll(user);
+        list.forEach(item -> item.setPassword(null));
         return PageInfo.of(list);
     }
 
-    /**
-     * 登录
-     */
     public User login(Account account) {
         User dbUser = userMapper.selectByUsername(account.getUsername());
         if (ObjectUtil.isNull(dbUser)) {
             throw new CustomException(ResultCodeEnum.USER_NOT_EXIST_ERROR);
         }
-        if (!dbUser.getPassword().equals(account.getPassword())) {
+        if (!PasswordUtils.matches(account.getPassword(), dbUser.getPassword())) {
             throw new CustomException(ResultCodeEnum.USER_ACCOUNT_ERROR);
         }
-        // 生成token
+        if (!PasswordUtils.isEncoded(dbUser.getPassword())) {
+            dbUser.setPassword(PasswordUtils.encode(account.getPassword()));
+            userMapper.updateById(dbUser);
+        }
         String token = TokenUtils.createToken(dbUser.getId() + "-" + dbUser.getRole(), dbUser.getPassword());
         dbUser.setToken(token);
+        dbUser.setPassword(null);
         return dbUser;
     }
 
-    /**
-     * 修改密码
-     */
     public void updatePassword(Account account) {
         User dbUser = userMapper.selectByUsername(account.getUsername());
         if (ObjectUtil.isNull(dbUser)) {
             throw new CustomException(ResultCodeEnum.USER_NOT_EXIST_ERROR);
         }
-        if (!account.getPassword().equals(dbUser.getPassword())) {
+        AuthUtils.requireOwnerOrAdmin(dbUser.getId());
+        if (!PasswordUtils.matches(account.getPassword(), dbUser.getPassword())) {
             throw new CustomException(ResultCodeEnum.PARAM_PASSWORD_ERROR);
         }
-        dbUser.setPassword(account.getNewPassword());
+        dbUser.setPassword(PasswordUtils.encode(account.getNewPassword()));
         userMapper.updateById(dbUser);
     }
-
 }

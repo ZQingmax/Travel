@@ -20,14 +20,13 @@
 
     <select id="selectById" resultType="com.mingde.entity.Orders">
         select orders.*, user.name as userName from orders
-         left join user on orders.user_id = user.id
-            from orders
+        left join user on orders.user_id = user.id
         where orders.id = #{id}
     </select>
 
     <delete id="deleteById">
         delete from orders
-        where  id = #{id}
+        where id = #{id}
     </delete>
 
     <insert id="insert" parameterType="com.mingde.entity.Orders" useGeneratedKeys="true" keyProperty="id">
@@ -67,42 +66,18 @@
     <update id="updateById" parameterType="com.mingde.entity.Orders">
         update orders
         <set>
-            <if test="orderNo != null">
-                order_no = #{orderNo},
-            </if>
-            <if test="name != null">
-                name = #{name},
-            </if>
-            <if test="tourismImg != null">
-                tourism_img = #{tourismImg},
-            </if>
-            <if test="tourismPrice != null">
-                tourism_price = #{tourismPrice},
-            </if>
-            <if test="tourismId != null">
-                tourism_id = #{tourismId},
-            </if>
-            <if test="num != null">
-                num = #{num},
-            </if>
-            <if test="total != null">
-                total = #{total},
-            </if>
-            <if test="userId != null">
-                user_id = #{userId},
-            </if>
-            <if test="time != null">
-                time = #{time},
-            </if>
-            <if test="payNo != null">
-                pay_no = #{payNo},
-            </if>
-            <if test="payTime != null">
-                pay_time = #{payTime},
-            </if>
-            <if test="status != null">
-                status = #{status},
-            </if>
+            <if test="orderNo != null">order_no = #{orderNo},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="tourismImg != null">tourism_img = #{tourismImg},</if>
+            <if test="tourismPrice != null">tourism_price = #{tourismPrice},</if>
+            <if test="tourismId != null">tourism_id = #{tourismId},</if>
+            <if test="num != null">num = #{num},</if>
+            <if test="total != null">total = #{total},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="time != null">time = #{time},</if>
+            <if test="payNo != null">pay_no = #{payNo},</if>
+            <if test="payTime != null">pay_time = #{payTime},</if>
+            <if test="status != null">status = #{status},</if>
         </set>
         where id = #{id}
     </update>
