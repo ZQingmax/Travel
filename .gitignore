@@ -1,0 +1,27 @@
+﻿# IDE
+.idea/
+.vscode/
+
+# Dependencies
+node_modules/
+vue/node_modules/
+
+# Build outputs
+dist/
+vue/dist/
+springboot/target/
+
+# Runtime uploads and logs
+files/
+springboot/files/
+logs/
+*.log
+
+# Local environment overrides
+.env.local
+.env.*.local
+application-local.yml
+
+# OS files
+.DS_Store
+Thumbs.db
