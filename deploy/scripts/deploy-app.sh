@@ -35,15 +35,23 @@ echo "[2/8] Creating upload directory"
 mkdir -p "$FILE_UPLOAD_DIR"
 
 echo "[3/8] Preparing MySQL database and user"
-MYSQL_ROOT_ARGS=(-uroot)
+MYSQL_ROOT_CMD=(mysql -uroot)
 if [ -n "${MYSQL_ROOT_PASSWORD:-}" ]; then
-  MYSQL_ROOT_ARGS=(-uroot "-p${MYSQL_ROOT_PASSWORD}")
+  MYSQL_ROOT_CMD=(mysql -uroot "-p${MYSQL_ROOT_PASSWORD}")
+elif mysql -uroot -e "SELECT 1" >/dev/null 2>&1; then
+  MYSQL_ROOT_CMD=(mysql -uroot)
+elif sudo mysql -e "SELECT 1" >/dev/null 2>&1; then
+  MYSQL_ROOT_CMD=(sudo mysql)
+else
+  echo "Cannot connect to MySQL as root. Set MYSQL_ROOT_PASSWORD in /etc/travel/travel.env or run: sudo mysql"
+  exit 1
 fi
-mysql "${MYSQL_ROOT_ARGS[@]}" <<SQL
+"${MYSQL_ROOT_CMD[@]}" <<SQL
 CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER IF NOT EXISTS '${MYSQL_USERNAME}'@'localhost' IDENTIFIED BY '${MYSQL_PASSWORD}';
 CREATE USER IF NOT EXISTS '${MYSQL_USERNAME}'@'127.0.0.1' IDENTIFIED BY '${MYSQL_PASSWORD}';
 GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE}\`.* TO '${MYSQL_USERNAME}'@'localhost';
+GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE}\`.* TO '${MYSQL_USERNAME}'@'127.0.0.1';
 FLUSH PRIVILEGES;
 SQL
 
